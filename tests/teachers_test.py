@@ -99,3 +99,20 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+# Edited 
+
+def test_list_assignments_teacher_with_submitted_and_graded(client, h_teacher_1):
+    """
+    success case: list both submitted and graded assignments for a teacher
+    """
+    response = client.get(
+        '/teacher/assignments',
+        headers=h_teacher_1
+    )
+
+    assert response.status_code == 200
+    data = response.json['data']
+    for assignment in data:
+        assert assignment['teacher_id'] == 1
+        assert assignment['state'] in ['SUBMITTED', 'GRADED']

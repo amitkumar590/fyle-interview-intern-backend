@@ -2,8 +2,7 @@ from flask import Blueprint
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
-from core.models.assignments import Assignment
-
+from core.models.assignments import Assignment, AssignmentStateEnum
 from .schema import AssignmentSchema, AssignmentSubmitSchema
 student_assignments_resources = Blueprint('student_assignments_resources', __name__)
 
@@ -22,6 +21,9 @@ def list_assignments(p):
 @decorators.authenticate_principal
 def upsert_assignment(p, incoming_payload):
     """Create or Edit an assignment"""
+    if incoming_payload.get('content') is None:
+        return APIResponse.respond_error(message='Content cannot be null', status_code=400)
+
     assignment = AssignmentSchema().load(incoming_payload)
     assignment.student_id = p.student_id
 
@@ -38,11 +40,22 @@ def submit_assignment(p, incoming_payload):
     """Submit an assignment"""
     submit_assignment_payload = AssignmentSubmitSchema().load(incoming_payload)
 
-    submitted_assignment = Assignment.submit(
-        _id=submit_assignment_payload.id,
-        teacher_id=submit_assignment_payload.teacher_id,
-        auth_principal=p
-    )
+    assignment = Assignment.get_by_id(submit_assignment_payload.id)
+    if not assignment:
+        return APIResponse.respond_error(message='No assignment found with the given ID', status_code=404)
+
+    if assignment.student_id != p.student_id:
+        return APIResponse.respond_error(message='This assignment does not belong to the current student', status_code=403)
+
+    if assignment.content is None:
+        return APIResponse.respond_error(message='Assignment content cannot be empty', status_code=400)
+
+    if assignment.state != AssignmentStateEnum.DRAFT:
+        return APIResponse.respond_error_with_details(message='only a draft assignment can be submitted', status_code=400, error='FyleError')    
+
+    assignment.state = AssignmentStateEnum.SUBMITTED
+    assignment.teacher_id = submit_assignment_payload.teacher_id
     db.session.commit()
-    submitted_assignment_dump = AssignmentSchema().dump(submitted_assignment)
+
+    submitted_assignment_dump = AssignmentSchema().dump(assignment)
     return APIResponse.respond(data=submitted_assignment_dump)
