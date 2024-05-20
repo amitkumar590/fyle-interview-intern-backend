@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: ["./run.sh"]
+    volumes:
+      - .:/app
+    ports:
+      - "7755:7755"

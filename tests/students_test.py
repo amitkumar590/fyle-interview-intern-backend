@@ -1,3 +1,5 @@
+from core.models.assignments import Assignment, AssignmentStateEnum, GradeEnum
+
 def test_get_assignments_student_1(client, h_student_1):
     response = client.get(
         '/student/assignments',
@@ -58,24 +60,25 @@ def test_post_assignment_student_1(client, h_student_1):
 
 
 def test_submit_assignment_student_1(client, h_student_1):
+
+    assignment = Assignment.query.get(1)
+    assignment.state = AssignmentStateEnum.DRAFT
+
     response = client.post(
         '/student/assignments/submit',
         headers=h_student_1,
         json={
-            'id': 2,
+            'id': 1,
+
             'teacher_id': 2
-        })
+        })   
 
-    # Edited
-    # Assert that the response status code is either 200 or 400
-    assert response.status_code in [200, 400]
+    assert response.status_code == 200
 
-    # If the status code is 200, assert the data
-    if response.status_code == 200:
-        data = response.json['data']
-        assert data['student_id'] == 1
-        assert data['state'] == 'SUBMITTED'
-        assert data['teacher_id'] == 2
+    data = response.json['data']
+    assert data['student_id'] == 1
+    assert data['state'] == 'SUBMITTED'
+    assert data['teacher_id'] == 2
 
 
 def test_assignment_resubmit_error(client, h_student_1):

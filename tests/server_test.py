@@ -19,18 +19,6 @@ def test_error_handler_fyle_error(client):
     assert 'error' in response.json
     assert response.json['error'] == 'NotFound'
 
-# def test_error_handler_validation_error(client):
-#     response = client.post('/student/assignments', json={})
-#     assert response.status_code == 400
-#     assert 'error' in response.json
-#     assert response.json['error'] == 'ValidationError'
-
-# def test_error_handler_integrity_error(client):
-#     response = client.post('/student/assignments', json={'content': None})
-#     assert response.status_code == 400
-#     assert 'error' in response.json
-#     assert response.json['error'] == 'IntegrityError'
-
 def test_error_handler_http_exception(client):
     response = client.get('/nonexistentroute')
     assert response.status_code == 404

@@ -44,3 +44,6 @@ def handle_error(err):
         ), err.code
 
     raise err
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=7755)    

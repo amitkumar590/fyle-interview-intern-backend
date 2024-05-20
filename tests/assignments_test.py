@@ -77,10 +77,6 @@ def test_get_assignments_by_teacher(client):
     with patch('core.models.assignments.Assignment.query') as mock_query:
         mock_query.all.return_value = [Assignment(id=1), Assignment(id=2)]
         assignments = Assignment.get_assignments_by_teacher()
-
-        # Debugging information
-        # print("Actual assignments:", assignments)
-
         assert len(assignments) == 2, f"Expected 2 assignments but got {len(assignments)}"
 
 @pytest.fixture

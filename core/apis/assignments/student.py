@@ -47,9 +47,6 @@ def submit_assignment(p, incoming_payload):
     if assignment.student_id != p.student_id:
         return APIResponse.respond_error(message='This assignment does not belong to the current student', status_code=403)
 
-    if assignment.content is None:
-        return APIResponse.respond_error(message='Assignment content cannot be empty', status_code=400)
-
     if assignment.state != AssignmentStateEnum.DRAFT:
         return APIResponse.respond_error_with_details(message='only a draft assignment can be submitted', status_code=400, error='FyleError')    
 

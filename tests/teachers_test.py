@@ -33,7 +33,7 @@ def test_grade_assignment_cross(client, h_teacher_2):
         '/teacher/assignments/grade',
         headers=h_teacher_2,
         json={
-            "id": 1,
+            "id": 2,
             "grade": "A"
         }
     )
